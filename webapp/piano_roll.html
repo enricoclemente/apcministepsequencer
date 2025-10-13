@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>WebMidi.js Quick Start</title>
+    <script src="https://cdn.jsdelivr.net/npm/webmidi@latest/dist/iife/webmidi.iife.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        #status {
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .piano {
+            position: relative;
+            width: calc(64 * 36px);
+            height: 250px;
+            margin: auto;
+            cursor: default;
+        }
+
+        /* Tasto bianco */
+        .key.white {
+            position: absolute;
+            width: 36px;
+            height: 180px;
+            background: white;
+            border: 1px solid #555;
+            border-radius: 0 0 4px 4px;
+            box-sizing: border-box;
+            font-size: 10px;
+            font-weight: bold;
+            color: #333;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .key.white span {
+            margin-bottom: 4px;
+        }
+
+        .key.white.active {
+            background: #81c784;
+        }
+
+        /* Tasto nero */
+        .key.black {
+            position: absolute;
+            width: 24px;
+            height: 110px;
+            background: black;
+            border-radius: 0 0 3px 3px;
+            top: 0;
+            z-index: 2;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
+        }
+
+        .key.black span {
+            position: absolute;
+            top: 2px;
+            width: 100%;
+            font-size: 9px;
+            color: #fff;
+            text-align: center;
+        }
+
+        .key.black.active {
+            background: #43a047;
+            box-shadow: 0 0 10px #43a047;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Piano Roll MIDI - 64 Note Allineato, più largo & Nomi Note</h2>
+    <div id="status">Inizializzando MIDI...</div>
+    <div class="piano" id="piano"></div>
+
+    <script>
+        const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const START_NOTE = 0; // C2
+        const NUM_KEYS = 64;
+        const piano = document.getElementById("piano");
+
+        // Funzione per verificare se una nota è nera
+        function isBlackKey(note) {
+            const n = note % 12;
+            return [1, 3, 6, 8, 10].includes(n);
+        }
+
+        // Creiamo i tasti bianchi con i nomi
+        let whiteXPos = 0;
+        const whiteKeys = [];
+        for (let i = 0; i < NUM_KEYS; i++) {
+            const note = START_NOTE + i;
+            if (!isBlackKey(note)) {
+                const key = document.createElement("div");
+                key.className = "key white";
+                key.id = "key" + note;
+                key.style.left = (whiteXPos * 36) + 'px';
+                // nome della nota
+                const noteName = NOTE_NAMES[note % 12] + (Math.floor(note / 12) - 1);
+                key.innerHTML = `<span>${noteName}</span>`;
+                piano.appendChild(key);
+                whiteXPos++;
+                whiteKeys.push({ note: note, x: whiteXPos - 1 });
+            }
+        }
+
+        // Posizioniamo i tasti neri
+        for (let i = 0; i < NUM_KEYS; i++) {
+            const note = START_NOTE + i;
+            if (isBlackKey(note)) {
+                const key = document.createElement("div");
+                key.className = "key black";
+                key.id = "key" + note;
+                // Trova la posizione corretta in base ai bianchi
+                const nInOctave = note % 12;
+                let posX = 0;
+                // Cerca il bianco precedente
+                for (let j = i - 1; j >= 0; j--) {
+                    if (!isBlackKey(START_NOTE + j)) {
+                        posX = whiteKeys.find(w => w.note === START_NOTE + j).x;
+                        break;
+                    }
+                }
+                // Posizione in pixel
+                key.style.left = (posX * 36 + 24) + 'px'; // +24 per spostare in mezzo al bianco
+                // nome note
+                const noteName = NOTE_NAMES[note % 12] + (Math.floor(note / 12) - 1);
+                key.innerHTML = `<span>${noteName}</span>`;
+                piano.appendChild(key);
+            }
+        }
+
+        // Funzione per attivare/disattivare tasti
+        function setKey(note, active) {
+            const elem = document.getElementById("key" + note);
+            if (elem) {
+                if (active) elem.classList.add("active");
+                else elem.classList.remove("active");
+            }
+        }
+
+        // Inizializza WebMidi.js
+        WebMidi.enable()
+            .then(() => {
+                const status = document.getElementById("status");
+                if (WebMidi.inputs.length === 0) {
+                    status.textContent = "Nessun dispositivo MIDI rilevato.";
+                    return;
+                }
+                status.textContent = "Dispositivo MIDI: " + WebMidi.inputs.map(i => i.name).join(", ");
+                WebMidi.inputs.forEach(input => {
+                    input.addListener("noteon", "all", e => setKey(e.note.number, true));
+                    input.addListener("noteoff", "all", e => setKey(e.note.number, false));
+                });
+            })
+            .catch(err => {
+                document.getElementById("status").textContent = "Errore: " + err;
+            });
+    </script>
+</body>
+
+</html>
