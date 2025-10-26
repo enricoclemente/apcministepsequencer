@@ -1,5 +1,12 @@
 let currentInput = null;
+let currentThrough = null;
 let currentOutput = null;
+
+let midiDevStatus = {
+    input: null,
+    through: null,
+    output: null
+}
 
 function clearListeners(input) {
     if (input) {
@@ -8,9 +15,10 @@ function clearListeners(input) {
     }
 }
 
-function updateDeviceLists(inputSelect, outputSelect, status) {
+function updateDeviceLists(inputSelect, throughSelect, outputSelect) {
     // salva selezioni attuali per ripristinarle
     const selectedInputId = inputSelect.value;
+    const selectedThroughId = throughSelect.value;
     const selectedOutputId = outputSelect.value;
 
     // aggiorna input
@@ -27,7 +35,24 @@ function updateDeviceLists(inputSelect, outputSelect, status) {
         inputSelect.value = WebMidi.inputs[0].id;
     } else {
         inputSelect.value = '';
-        status.textContent = "Nessun dispositivo MIDI di input disponibile.";
+        console.error("Nessun dispositivo MIDI di input disponibile");
+    }
+
+    // aggiorna through
+    throughSelect.innerHTML = '';
+    WebMidi.outputs.forEach(output => {
+        const option = document.createElement('option');
+        option.value = output.id;
+        option.textContent = output.name;
+        throughSelect.appendChild(option);
+    });
+    if (throughSelect.querySelector(`option[value="${selectedThroughId}"]`)) {
+        throughSelect.value = selectedThroughId;
+    } else if (WebMidi.outputs.length > 0) {
+        throughSelect.value = WebMidi.outputs[0].id;
+    } else {
+        throughSelect.value = '';
+        console.error("Nessun dispositivo MIDI di output disponibile");
     }
 
     // aggiorna output
@@ -44,34 +69,56 @@ function updateDeviceLists(inputSelect, outputSelect, status) {
         outputSelect.value = WebMidi.outputs[0].id;
     } else {
         outputSelect.value = '';
-        status.textContent += " Nessun dispositivo MIDI di output disponibile.";
+        console.error("Nessun dispositivo MIDI di output disponibile");
     }
 }
 
-function onInputChange(e, inputSelect, status) {
+
+function onInputChange(e, inputSelect) {
     clearListeners();
     const selectedId = inputSelect.value;
     currentInput = WebMidi.getInputById(selectedId);
     if (currentInput) {
         currentInput.addListener('noteon', 'all', e => {
-            if (e.note.number >= 0 && e.note.number < 64) 
-                setPadActive(currentOutput, e.note.number, true);
+            if (e.note.number >= 0 && e.note.number < 64) {
+                setPad(currentThrough, e.note.number, true);
+                if(currentOutput) {
+                    currentOutput.send([0x90 + 0, parseInt(e.note.number), 127]);
+                } else {
+                    console.error("There is not a valid midi output")
+                }
+            }
         });
         currentInput.addListener('noteoff', 'all', e => {
-            if (e.note.number >= 0 && e.note.number < 64) 
-                setPadActive(currentOutput, e.note.number, false);
+            if (e.note.number >= 0 && e.note.number < 64) {
+                setPad(currentThrough, e.note.number, false);
+                if(currentOutput) {
+                    currentOutput.send([0x80 + 0, parseInt(e.note.number), 0]);
+                } else {
+                    console.error("There is not a valid midi output")
+                }
+            }
         });
-        status.textContent = 'Input MIDI selezionato: ' + currentInput.name + (currentOutput ? ', Output: ' + currentOutput.name : '');
+        midiDevStatus.input = currentInput.name;
+        console.log(midiDevStatus);
     } else {
-        status.textContent = 'Nessun input selezionato';
+        console.error("There is not a valid midi input");
     }
 }
 
-function onOutputChange(status) {
+function onThroughChange() {
+    const selectedId = throughSelect.value;
+    currentThrough = WebMidi.getOutputById(selectedId);
+    resetPadStatus(currentThrough);
+    midiDevStatus.through = currentThrough.name;
+    console.log(midiDevStatus);
+}
+
+function onOutputChange() {
     const selectedId = outputSelect.value;
     currentOutput = WebMidi.getOutputById(selectedId);
-    resetPadStatus(currentOutput);
-    status.textContent = (currentInput ? 'Input: ' + currentInput.name : 'Nessun input') + ', Output MIDI selezionato: ' + (currentOutput ? currentOutput.name : 'nessuno');
+    midiDevStatus.output = currentOutput.name;
+    console.log(midiDevStatus);
 }
 
 

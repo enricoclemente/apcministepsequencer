@@ -1,35 +1,35 @@
 const inputSelect = document.getElementById('inputSelect');
+const throughSelect = document.getElementById('throughSelect');
 const outputSelect = document.getElementById('outputSelect');
-const midiDevStatus = document.getElementById('status');
 const grid = document.getElementById('grid');
-
-
 
 initPadGrid(grid);
 
 WebMidi.enable()
     .then(() => {
         // Aggiorna liste dispositivi iniziali
-        updateDeviceLists(inputSelect, outputSelect, midiDevStatus);
+        updateDeviceLists(inputSelect, throughSelect, outputSelect);
 
         // Imposta event listeners selezione
-        inputSelect.addEventListener('change', (e) => onInputChange(e, inputSelect, midiDevStatus));
-        outputSelect.addEventListener('change', (e) => onOutputChange(midiDevStatus));
+        inputSelect.addEventListener('change', (e) => onInputChange(e, inputSelect));
+        throughSelect.addEventListener('change', (e) => onThroughChange());
+        outputSelect.addEventListener('change', (e) => onOutputChange());
 
         WebMidi.addListener('connected', e => {
-            updateDeviceLists(inputSelect, outputSelect, midiDevStatus);
+            updateDeviceLists(inputSelect, throughSelect, outputSelect);
         });
 
         WebMidi.addListener('disconnected', e => {
-            updateDeviceLists(inputSelect, outputSelect, midiDevStatus);
+            updateDeviceLists(inputSelect, throughSelect, outputSelect);
         });
 
 
         // Selezione iniziale di input/output e attivazione listener
-        onInputChange(null, inputSelect, midiDevStatus);
-        onOutputChange(midiDevStatus);
-        resetPadStatus(currentOutput);
+        onInputChange(null, inputSelect);
+        onThroughChange()
+        onOutputChange();
+        resetPadStatus(currentThrough);
     })
     .catch(err => {
-        document.getElementById('status').textContent = "Errore WebMidi.js: " + err;
+        console.error("Errore WebMidi.js: " + err);
     });

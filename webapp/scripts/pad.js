@@ -38,28 +38,28 @@ function initPadGrid(grid) {
     });
 }
 
-function setPadActive(output, note, active) {
+function setPad(throughMidi, note, active) {
     const pad = document.getElementById('pad-' + note);
     if (pad) pad.classList.toggle('active', active);
-    if (output) {
+    if (throughMidi) {
         if (active) {
-            output.send([0x90 + 0, note, 1]);
+            throughMidi.send([0x90 + 0, note, 1]);
         } else {
             const row = 7 - parseInt(note / 8)
             const col = note % 8
-            output.send([0x90 + 0, note, parseInt(padConf[row][col])]);
+            throughMidi.send([0x90 + 0, note, parseInt(padConf[row][col])]);
         }
     } else {
-        console.error("There is not a valid midi output")
+        console.error("There is not a valid midi through")
     }
 }
 
-function resetPadStatus(output) {
-    if (output) {
+function resetPadStatus(throughMidi) {
+    if (throughMidi) {
         let k = 0
         for (let i = 7; i >= 0; i--) {
             for (let j = 0; j < 8; j++) {
-                output.send([0x90 + 0, k, parseInt(padConf[i][j])]);
+                throughMidi.send([0x90 + 0, k, parseInt(padConf[i][j])]);
                 k++
             }
         }

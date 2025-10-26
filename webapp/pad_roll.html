@@ -71,11 +71,13 @@
 
 <body>
     <h2>Griglia 8x8 Akai Pad - Numero e Nota (WebMidi.js)</h2>
-    <div id="status">Inizializzazione MIDI...</div>
 
     <div>
         <label for="inputSelect">MIDI Input:</label>
         <select id="inputSelect"></select>
+
+        <label for="throughSelect">MIDI Through:</label>
+        <select id="throughSelect"></select>
 
         <label for="outputSelect">MIDI Output:</label>
         <select id="outputSelect"></select>
@@ -84,7 +86,6 @@
     <div class="grid" id="grid"></div>
 
     <script src="scripts/notes.js"></script>
-    <script src="scripts/scale.js"></script>
     <script src="scripts/pad.js"></script>
     <script src="scripts/midi.js"></script>
     <script src="scripts/pianoRoll.js"></script>
