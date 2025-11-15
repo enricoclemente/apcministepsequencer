@@ -1,10 +1,5 @@
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
-function midiNoteToName(note) {
-    const octave = Math.floor(note / 12) - 1;
-    const name = NOTE_NAMES[note % 12];
-    return name + octave;
-}
 
 const akaiToMatrix = new Map([
 // row 0

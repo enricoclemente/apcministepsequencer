@@ -30,8 +30,8 @@ function initPadGrid(grid) {
 
         const labelNote = document.createElement('div');
         labelNote.classList.add('pad-label-note');
-        labelNote.textContent = midiNoteToName(note);
-
+        labelNote.textContent = Utilities.toNoteIdentifier(note);
+        
         pad.appendChild(labelNum);
         pad.appendChild(labelNote);
         grid.appendChild(pad);
