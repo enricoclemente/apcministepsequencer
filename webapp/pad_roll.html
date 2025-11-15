@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Griglia 8x8 Akai Pad con Nota</title>
+    <title>Step SEQ+</title>
     <script src="https://cdn.jsdelivr.net/npm/webmidi@latest/dist/iife/webmidi.iife.js"></script>
     <style>
         body {
@@ -19,12 +19,14 @@
         label {
             margin-right: 10px;
             font-weight: bold;
+            margin-bottom: 16px;
         }
 
         select {
             margin-right: 30px;
             font-size: 1em;
             padding: 3px 8px;
+            margin-bottom: 16px;
         }
 
         .grid {
@@ -49,6 +51,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            margin-bottom: 16px;
         }
 
         .pad.active {
@@ -70,8 +73,6 @@
 </head>
 
 <body>
-    <h2>Griglia 8x8 Akai Pad - Numero e Nota (WebMidi.js)</h2>
-
     <div>
         <label for="inputSelect">MIDI Input:</label>
         <select id="inputSelect"></select>
@@ -82,13 +83,20 @@
         <label for="outputSelect">MIDI Output:</label>
         <select id="outputSelect"></select>
     </div>
+    <div>
+        <label for="rootNoteSelect">Root note:</label>
+        <select id="rootNoteSelect"></select>
+
+        <label for="octaveSelect" style="margin-left:18px;">Octave:</label>
+        <select id="octaveSelect"></select>
+    </div>
 
     <div class="grid" id="grid"></div>
 
     <script src="scripts/notes.js"></script>
     <script src="scripts/pad.js"></script>
     <script src="scripts/midi.js"></script>
-    <script src="scripts/pianoRoll.js"></script>
+    <script src="scripts/main.js"></script>
 </body>
 
 </html>

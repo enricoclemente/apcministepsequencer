@@ -10,11 +10,13 @@ const padConf = [
 ]
 
 function initPadGrid(grid) {
+    grid.innerHTML = '';
+
     // Crea 64 pad dal 0 al 63 in griglia 8x8 Akai (riga 7 a 0 invertita)
     let padNotes = [];
     for (let row = 7; row >= 0; row--) {
         for (let col = 0; col < 8; col++) {
-            let note = row * 8 + col;
+            let note = row * 8 + col + rootMidiNote;
             padNotes.push(note);
         }
     }
@@ -39,7 +41,8 @@ function initPadGrid(grid) {
 }
 
 function setPad(throughMidi, note, active) {
-    const pad = document.getElementById('pad-' + note);
+    const pad = document.getElementById('pad-' + (note + rootMidiNote));
+    console.log(pad)
     if (pad) pad.classList.toggle('active', active);
     if (throughMidi) {
         if (active) {

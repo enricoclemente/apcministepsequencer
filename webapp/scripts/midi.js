@@ -8,6 +8,32 @@ let midiDevStatus = {
     output: null
 }
 
+let rootMidiNote = 0;
+
+function initRootMidiNote(rootNoteSelect, octaveSelect) {
+    for (let note of NOTE_NAMES) {
+        const option = document.createElement("option");
+        option.value = note;
+        option.textContent = note;
+        rootNoteSelect.appendChild(option);
+    }
+
+    for (let octave of OCTAVES) {
+        const option = document.createElement("option");
+        option.value = octave;
+        option.textContent = String(octave);
+        octaveSelect.appendChild(option);
+    }
+}
+
+function updateRootNote(rootNoteSelect, octaveSelect, grid) {
+    const root = rootNoteSelect.value;
+    const octave = parseInt(octaveSelect.value);
+    rootMidiNote = Utilities.toNoteNumber(root + octave);
+    initPadGrid(grid);
+    console.log("Nota scelta:", root + octave, "| Numero MIDI:", rootMidiNote);
+}
+
 function clearListeners(input) {
     if (input) {
         input.removeListener('noteon', 'all');
@@ -73,7 +99,6 @@ function updateDeviceLists(inputSelect, throughSelect, outputSelect) {
     }
 }
 
-
 function onInputChange(e, inputSelect) {
     clearListeners();
     const selectedId = inputSelect.value;
@@ -82,8 +107,8 @@ function onInputChange(e, inputSelect) {
         currentInput.addListener('noteon', 'all', e => {
             if (e.note.number >= 0 && e.note.number < 64) {
                 setPad(currentThrough, e.note.number, true);
-                if(currentOutput) {
-                    currentOutput.send([0x90 + 0, parseInt(e.note.number), 127]);
+                if (currentOutput) {
+                    currentOutput.send([0x90 + 0, (parseInt(e.note.number) + parseInt(rootMidiNote)), 127]);
                 } else {
                     console.error("There is not a valid midi output")
                 }
@@ -92,8 +117,8 @@ function onInputChange(e, inputSelect) {
         currentInput.addListener('noteoff', 'all', e => {
             if (e.note.number >= 0 && e.note.number < 64) {
                 setPad(currentThrough, e.note.number, false);
-                if(currentOutput) {
-                    currentOutput.send([0x80 + 0, parseInt(e.note.number), 0]);
+                if (currentOutput) {
+                    currentOutput.send([0x80 + 0, (parseInt(e.note.number) + parseInt(rootMidiNote)), 0]);
                 } else {
                     console.error("There is not a valid midi output")
                 }
@@ -120,5 +145,7 @@ function onOutputChange() {
     midiDevStatus.output = currentOutput.name;
     console.log(midiDevStatus);
 }
+
+
 
 
