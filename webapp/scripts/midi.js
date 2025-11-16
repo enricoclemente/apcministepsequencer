@@ -8,7 +8,6 @@ let midiDevStatus = {
     output: null
 }
 
-
 let rootMidiNote = 0;
 
 const activeMidiNotes = new Set();
@@ -119,7 +118,7 @@ function onInputChange(e, inputSelect) {
 function onThroughChange() {
     const selectedId = throughSelect.value;
     currentThrough = WebMidi.getOutputById(selectedId);
-    resetPadStatus(currentThrough);
+    setAllPadStatus(currentThrough);
     midiDevStatus.through = currentThrough.name;
     console.log(midiDevStatus);
 }
@@ -129,22 +128,6 @@ function onOutputChange() {
     currentOutput = WebMidi.getOutputById(selectedId);
     midiDevStatus.output = currentOutput.name;
     console.log(midiDevStatus);
-}
-
-function initRootMidiNote(rootNoteSelect, octaveSelect) {
-    for (let note of NOTE_NAMES) {
-        const option = document.createElement("option");
-        option.value = note;
-        option.textContent = note;
-        rootNoteSelect.appendChild(option);
-    }
-
-    for (let octave of OCTAVES) {
-        const option = document.createElement("option");
-        option.value = octave;
-        option.textContent = String(octave);
-        octaveSelect.appendChild(option);
-    }
 }
 
 function updateRootNote(rootNoteSelect, octaveSelect, grid) {

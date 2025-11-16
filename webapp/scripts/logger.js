@@ -53,3 +53,24 @@ function createLogger(moduleName, opts = {}) {
         disable(level) { if (level in enabled) enabled[level] = false; }
     };
 }
+
+function prettyPrintMatrix(matrix) {
+    if (!Array.isArray(matrix) || matrix.length === 0) {
+        console.log("Ehm... questa non è proprio una matrice. 🤨");
+        return;
+    }
+
+    const colWidths = matrix[0].map((_, colIndex) =>
+        Math.max(
+            ...matrix.map(row => String(row[colIndex]).length)
+        )
+    );
+
+    const lines = matrix.map(row =>
+        row.map((cell, i) =>
+            String(cell).padStart(colWidths[i])
+        ).join(" | ")
+    );
+
+    return lines.join("\n");
+}

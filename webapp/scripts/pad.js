@@ -1,44 +1,6 @@
-const padConf = [
-    [0, 0, 0, 0, 5, 0, 0, 0],
-    [5, 0, 0, 0, 3, 0, 0, 0],
-    [3, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 5, 0, 0, 0],
-    [5, 0, 0, 0, 3, 0, 0, 0],
-    [3, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 5, 0, 0, 0],
-    [5, 0, 0, 0, 3, 0, 0, 0],
-]
+let currentPadGrid = createScaleMatrix(scales.none);    // all'inizio la griglia di pad segna solo ogni primo tono
 
-function initPadGrid(grid) {
-    grid.innerHTML = '';
-
-    // Crea 64 pad dal 0 al 63 in griglia 8x8 Akai (riga 7 a 0 invertita)
-    let padNotes = [];
-    for (let row = 7; row >= 0; row--) {
-        for (let col = 0; col < 8; col++) {
-            let note = row * 8 + col + rootMidiNote;
-            padNotes.push(note);
-        }
-    }
-
-    padNotes.forEach(note => {
-        const pad = document.createElement('div');
-        pad.classList.add('pad');
-        pad.id = 'pad-' + note;
-
-        const labelNum = document.createElement('div');
-        labelNum.classList.add('pad-label-num');
-        labelNum.textContent = note;
-
-        const labelNote = document.createElement('div');
-        labelNote.classList.add('pad-label-note');
-        labelNote.textContent = Utilities.toNoteIdentifier(note);
-        
-        pad.appendChild(labelNum);
-        pad.appendChild(labelNote);
-        grid.appendChild(pad);
-    });
-}
+const padLogger = createLogger("Pad");
 
 function setPad(throughMidi, note, active) {
     const pad = document.getElementById('pad-' + (note + rootMidiNote));
@@ -49,23 +11,49 @@ function setPad(throughMidi, note, active) {
         } else {
             const row = 7 - parseInt(note / 8)
             const col = note % 8
-            throughMidi.send([0x90 + 0, note, parseInt(padConf[row][col])]);
+            throughMidi.send([0x90 + 0, note, parseInt(currentPadGrid[row][col])]);
         }
     } else {
         console.error("There is not a valid midi through")
     }
 }
 
-function resetPadStatus(throughMidi) {
+function setAllPadStatus(throughMidi, scale = scales.none) {
     if (throughMidi) {
         let k = 0
         for (let i = 7; i >= 0; i--) {
             for (let j = 0; j < 8; j++) {
-                throughMidi.send([0x90 + 0, k, parseInt(padConf[i][j])]);
+                currentPadGrid = createScaleMatrix(scale);
+                padLogger.debug("setAllPadStatus", "currentPadGrid:\n" + prettyPrintMatrix(currentPadGrid));
+                throughMidi.send([0x90 + 0, k, parseInt(currentPadGrid[i][j])]);
                 k++
             }
         }
     } else {
         console.error("There is not a valid midi output")
     }
+}
+
+function createScaleMatrix(scalePattern, rows = 8, cols = 8) {
+    const matrix = Array(rows).fill(null).map(() => Array(cols).fill(0));
+    const scaleLen = scalePattern.length;
+
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            const noteIndex = c + r * cols;
+            const scaleNotePos = noteIndex % scaleLen;
+            if (scalePattern[scaleNotePos] === 1) {
+                matrix[rows - 1 - r][c] = (scaleNotePos === 0) ? 3 : 5;
+            }
+        }
+    }
+
+    return matrix;
+}
+
+function updateScale(scaleSelect, throughMidi, grid) {
+    const selectedScale = scaleSelect.value;
+    //padLogger.debug("updateScale", "selectedScale: " + selectedScale);
+    setAllPadStatus(throughMidi, scales[selectedScale]);
+    initPadGrid(grid)
 }

@@ -2,60 +2,76 @@ const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 
 const OCTAVES = [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8];
 
 const chords = {
-	major: [0, 4, 7],
-	minor: [0, 3, 7],
-	diminished: [0, 3, 6],
-	augmented: [0, 4, 8],
-	major7: [0, 4, 7, 11],
-	minor7: [0, 3, 7, 10],
-	dominant7: [0, 4, 7, 10],
-	major9: [0, 4, 7, 11, 14],
-	minor9: [0, 3, 7, 10, 14],
-	dominant9: [0, 4, 7, 10, 14],
-	major11: [0, 4, 7, 11, 14, 17],
-	minor11: [0, 3, 7, 10, 14, 17],
-	dominant11: [0, 4, 7, 10, 14, 17],
-	major13: [0, 4, 7, 11, 14, 17, 21],
-	minor13: [0, 3, 7, 10, 14, 17, 21],
-	dominant13: [0, 4, 7, 10, 14, 17, 21],
-	sus2: [0, 2, 7],
-	sus4: [0, 5, 7],
+	major: 		    [0, 4, 7],
+	minor: 		    [0, 3, 7],
+	diminished:     [0, 3, 6],
+	augmented: 	    [0, 4, 8],
+	major7: 	    [0, 4, 7, 11],
+	minor7: 	    [0, 3, 7, 10],
+	dominant7: 	    [0, 4, 7, 10],
+	major9: 	    [0, 4, 7, 11, 14],
+	minor9: 	    [0, 3, 7, 10, 14],
+	dominant9: 	    [0, 4, 7, 10, 14],
+	major11: 	    [0, 4, 7, 11, 14, 17],
+	minor11: 	    [0, 3, 7, 10, 14, 17],
+	dominant11:     [0, 4, 7, 10, 14, 17],
+	major13: 	    [0, 4, 7, 11, 14, 17, 21],
+	minor13: 	    [0, 3, 7, 10, 14, 17, 21],
+	dominant13:     [0, 4, 7, 10, 14, 17, 21],
+	sus2: 		    [0, 2, 7],
+	sus4: 		    [0, 5, 7],
 	halfDiminished: [0, 3, 6, 10]
 };
 
-const logger = createLogger("Notes");
+const scales = {
+	none: 			 [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	major: 			 [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1],
+	naturalMinor: 	 [1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0],
+	harmonicMinor: 	 [1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0],
+	melodicMinor: 	 [1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0],
+	dorian: 		 [1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1],
+	phrygian: 		 [1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0],
+	lydian: 		 [1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1],
+	mixolydian: 	 [1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 1],
+	locrian: 		 [1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0],
+	pentatonicMajor: [1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+	pentatonicMinor: [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
+	blues: 			 [1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0]
+}
+
+const notesLogger = createLogger("Notes");
 
 function arraysEqual(a, b) {
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] !== b[i]) return false;
-  }
-  return true;
+	if (a.length !== b.length) return false;
+	for (let i = 0; i < a.length; i++) {
+		if (a[i] !== b[i]) return false;
+	}
+	return true;
 }
 
 function identifyChordFromMidiNotes(midiNotes) {
-	logger.debug("identifyChordFromMidiNotes", 
-					"midiNotes: " + midiNotes.join(' ') + " | " + midiNotes.map(note => Utilities.toNoteIdentifier(note)).join(' '));
+	notesLogger.debug("identifyChordFromMidiNotes",
+		"midiNotes: " + midiNotes.join(' ') + " | " + midiNotes.map(note => Utilities.toNoteIdentifier(note)).join(' '));
 	const chord = document.getElementById('chord');
 	chord.innerHTML = "";
 	if (midiNotes.length === 0) return;
 
 	let notes = Array.from(new Set(midiNotes)).sort((a, b) => a - b);
-	logger.debug("identifyChordFromMidiNotes", 
-					"notes: " + notes.join(' ') + " | " + notes.map(note => Utilities.toNoteIdentifier(note)).join(' '));
+	notesLogger.debug("identifyChordFromMidiNotes",
+		"notes: " + notes.join(' ') + " | " + notes.map(note => Utilities.toNoteIdentifier(note)).join(' '));
 	for (let i = 0; i < notes.length; i++) {
 		const root = notes[i];
 		const intervals = Array.from(new Set(notes.map(n => (n - root + 12) % 12))).sort((a, b) => a - b);
-		logger.debug("identifyChordFromMidiNotes", 
-						"Intervals: " + intervals.join(" "));
+		notesLogger.debug("identifyChordFromMidiNotes",
+			"Intervals: " + intervals.join(" "));
 		for (const [name, pattern] of Object.entries(chords)) {
 			if (arraysEqual(intervals, pattern)) {
 				const bassNote = notes[0];
 				const inversion = root === bassNote ? '' : ` (inversione con basso ${Utilities.toNoteIdentifier(bassNote)})`;
-				
+
 				chord.innerHTML = `${Utilities.toNoteIdentifier(root)} ${name}${inversion}`;
-				logger.info("identifyChordFromMidiNotes", 
-								`${Utilities.toNoteIdentifier(root)} ${name}${inversion} | ${notes.map(note => Utilities.toNoteIdentifier(note)).join(' ')}`);
+				notesLogger.info("identifyChordFromMidiNotes",
+					`${Utilities.toNoteIdentifier(root)} ${name}${inversion} | ${notes.map(note => Utilities.toNoteIdentifier(note)).join(' ')}`);
 			}
 		}
 	}
