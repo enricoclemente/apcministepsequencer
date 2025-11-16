@@ -42,7 +42,6 @@ function initPadGrid(grid) {
 
 function setPad(throughMidi, note, active) {
     const pad = document.getElementById('pad-' + (note + rootMidiNote));
-    console.log(pad)
     if (pad) pad.classList.toggle('active', active);
     if (throughMidi) {
         if (active) {

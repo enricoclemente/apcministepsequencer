@@ -5,6 +5,7 @@
     <meta charset="UTF-8" />
     <title>Step SEQ+</title>
     <script src="https://cdn.jsdelivr.net/npm/webmidi@latest/dist/iife/webmidi.iife.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/loglevel/dist/loglevel.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -27,6 +28,15 @@
             font-size: 1em;
             padding: 3px 8px;
             margin-bottom: 16px;
+        }
+
+        .chord {
+            min-height: 30px;
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 1.17em;
         }
 
         .grid {
@@ -91,8 +101,10 @@
         <select id="octaveSelect"></select>
     </div>
 
+    <div class="chord" id="chord"></div>
     <div class="grid" id="grid"></div>
 
+    <script src="scripts/logger.js"></script>
     <script src="scripts/notes.js"></script>
     <script src="scripts/pad.js"></script>
     <script src="scripts/midi.js"></script>
