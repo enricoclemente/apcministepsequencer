@@ -57,13 +57,18 @@ function identifyChordFromMidiNotes(midiNotes) {
 	if (midiNotes.length === 0) return;
 
 	let notes = Array.from(new Set(midiNotes)).sort((a, b) => a - b);
+	let doubleOctaveNotes = Array.from(new Set(midiNotes.map(n => n % 24))).sort((a, b) => a - b)
 	notesLogger.debug("identifyChordFromMidiNotes",
 		"notes: " + notes.join(' ') + " | " + notes.map(note => Utilities.toNoteIdentifier(note)).join(' '));
 	for (let i = 0; i < notes.length; i++) {
-		const root = notes[i];
-		const intervals = Array.from(new Set(notes.map(n => (n - root + 12) % 12))).sort((a, b) => a - b);
+		const root = doubleOctaveNotes[i];
+		const intervals = Array.from(new Set(doubleOctaveNotes.map(n => {
+			let norm = n - root;
+			norm = norm < 0 ? norm + 12 : norm;
+			return norm % 24;
+		}))).sort((a, b) => a - b);
 		notesLogger.debug("identifyChordFromMidiNotes",
-			"Intervals: " + intervals.join(" "));
+			"Root: " + root + " Intervals: " + intervals.join(" "));
 		for (const [name, pattern] of Object.entries(chords)) {
 			if (arraysEqual(intervals, pattern)) {
 				const bassNote = notes[0];
