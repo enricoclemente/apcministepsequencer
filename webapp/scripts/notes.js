@@ -71,12 +71,13 @@ function identifyChordFromMidiNotes(midiNotes) {
 			"Root: " + root + " Intervals: " + intervals.join(" "));
 		for (const [name, pattern] of Object.entries(chords)) {
 			if (arraysEqual(intervals, pattern)) {
+				const realRoot = notes[i];
 				const bassNote = notes[0];
-				const inversion = root === bassNote ? '' : ` (inversione con basso ${Utilities.toNoteIdentifier(bassNote)})`;
+				const inversion = realRoot === bassNote ? '' : ` (inversione con basso ${Utilities.toNoteIdentifier(bassNote)})`;
 
-				chord.innerHTML = `${Utilities.toNoteIdentifier(root)} ${name}${inversion}`;
+				chord.innerHTML = `${Utilities.toNoteIdentifier(realRoot)} ${name}${inversion}`;
 				notesLogger.info("identifyChordFromMidiNotes",
-					`${Utilities.toNoteIdentifier(root)} ${name}${inversion} | ${notes.map(note => Utilities.toNoteIdentifier(note)).join(' ')}`);
+					`${Utilities.toNoteIdentifier(realRoot)} ${name}${inversion} | ${notes.map(note => Utilities.toNoteIdentifier(note)).join(' ')}`);
 			}
 		}
 	}
